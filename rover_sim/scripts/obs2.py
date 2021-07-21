@@ -82,7 +82,7 @@ class class1(object):
 rospy.init_node('sub_node')
 r = class1()
 rate = rospy.Rate(10)
-sub = rospy.Subscriber('/cbt', Float64, r.callback) #We subscribe to the laser's topic
+sub = rospy.Subscriber('/battery', Float64, r.callback) #We subscribe to the laser's topic
 subo = rospy.Subscriber('/scan', LaserScan, r.callback2)
 subw = rospy.Subscriber("/odom", Odometry, r.callback3)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)

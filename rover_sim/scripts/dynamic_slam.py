@@ -45,16 +45,21 @@ class explorer():
             self.move.linear.y = 0.0
             self.move.angular.z = 0.0
 
+        velocity_pub.publish(self.move)
+
 
 if __name__ == '__main__':
     rospy.init_node('dynamic_slam')
     turtle_bot = explorer()
     rate = rospy.Rate(10)
+    velocity_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+
+
     battery_sub = rospy.Subscriber('battery', Float64, turtle_bot.update_battery)
     odometry_sub = rospy.Subscriber('odom', Odometry, turtle_bot.update_position)
     laser_sub = rospy.Subscriber('scan', LaserScan, turtle_bot.avoid_obstacle)
     velocity_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
     rate = rospy.Rate(1)
-    velocity_pub.publish(turtle_bot.move)
+
     rate.sleep()
     rospy.spin()
