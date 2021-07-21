@@ -26,8 +26,9 @@ prt_rem = 100
 while prt_rem > 0:
     curr_cap = curr_cap - (curr_req*3600/3600)
     prt_rem = int(curr_cap*100/bt_cap)
-    rospy.init_node('bt_publisher')
-    pub = rospy.Publisher('/cbt', Float64, queue_size=10)
+    print("Battery remaining = ", prt_rem)
+    rospy.init_node('battery_publisher')
+    pub = rospy.Publisher('battery', Float64, queue_size=10)
     rate = rospy.Rate(10)
     curr = Float64() # defining the way we can allocate the values
     curr = prt_rem

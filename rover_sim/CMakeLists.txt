@@ -7,7 +7,15 @@ project(rover_sim)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+roscpp
+rospy
+tf
+geometry_msgs
+nav_msgs
+std_msgs
+sensor_msgs
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -200,3 +208,13 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+#Python Scripts:
+catkin_install_python(PROGRAMS scripts/battery.py
+                                scripts/obs2.py
+                                scripts/turtlebot_move.py
+                                scripts/pose_initializer.py
+                                scripts/dynamic_slam.py
+                                scripts/move_tester.py
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
