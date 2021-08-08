@@ -200,7 +200,7 @@ def findShortestPath(graph, image_size, start, end):
 
 def plan_returning_path(battery_over):
     if battery_over.data == True:
-        os.system("rosrun map_server map_saver -f /home/failedmesh/catkin_ws/src/Micromouse-Navigation/rover_sim/test_scripts/latest_map")
+        os.system("rosrun map_server map_saver -f /home/failedmesh/catkin_ws/src/Micromouse-Navigation/rover_sim/scripts/latest_map")
         #os.system("killall -9 rviz")
         #os.system("roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/failedmesh/latest_map.yaml")
         
