@@ -216,9 +216,10 @@ catkin_install_python(PROGRAMS scripts/battery.py
                                 scripts/pose_initializer.py
                                 scripts/dynamic_slam.py
                                 scripts/goal_setter.py
-                                scripts/rviz_controller.py
                                 scripts/test_scripts/move_tester.py
                                 scripts/test_scripts/os_commander_test.py
                                 scripts/test_scripts/pose_tester.py
+                                scripts/test_scripts/path_planner.py
+                                scripts/test_scripts/Dijkstra.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

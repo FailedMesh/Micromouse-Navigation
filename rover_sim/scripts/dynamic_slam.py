@@ -20,9 +20,10 @@ class explorer():
         self.battery = 0
         self.out_of_battery = Bool()
         self.out_of_battery = False
+        self.published_battery = False
 
     def update_battery(self, battery_left):
-        print("Battery remaining: ", battery_left.data)
+        #print("Battery remaining: ", battery_left.data)
         self.battery = battery_left.data
 
     def update_position(self, odometry):
@@ -62,8 +63,12 @@ class explorer():
             self.out_of_battery = True
             origin_pub.publish(self.origin)
 
+        print(self.move.linear.x, " ", self.move.linear.y, " ", self.move.angular.z)
         velocity_pub.publish(self.move)
-        battery_pub.publish(self.out_of_battery)
+
+        if (not self.published_battery) and self.out_of_battery:
+            battery_pub.publish(self.out_of_battery)
+            self.published_battery = True
 
 
 if __name__ == '__main__':
