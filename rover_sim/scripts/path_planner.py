@@ -1,9 +1,12 @@
+from numpy.core.defchararray import endswith
 import rospy
 import numpy as np
 import math
 import os
 import cv2
 from std_msgs.msg import Bool
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Pose2D
 #from Dijkstra import BinaryHeap, binarize, createGraph, dijkstra, findShortestPath
 
 class BinaryHeap():
@@ -184,21 +187,27 @@ def dijkstra(graph, graph_width, start = (0, 0)):
 
 
 
-def findShortestPath(graph, image_size, start, end):
-    distance, previous = dijkstra(graph, image_size, start)
+def findShortestPath(graph, image_size, start_coord, end_coord):
+    distance, previous = dijkstra(graph, image_size, start_coord)
     path = []
-    if distance[end] == np.inf:
-        return None
-    at = end
-    while previous[at] != start:
+    if distance[end_coord] == np.inf:
+        return []
+    at = end_coord
+    while previous[at] != start_coord:
         path.append(at)
         at = previous[at]
-    path.append(start)
+    path.append(start_coord)
     path.reverse()
     
     return path
 
 def plan_returning_path(battery_over):
+
+    global start, end
+    global transformation
+    global resolution, pixel_resolution
+    global start_sub
+
     if battery_over.data == True:
         os.system("rosrun map_server map_saver -f /home/failedmesh/catkin_ws/src/Micromouse-Navigation/rover_sim/scripts/latest_map")
         #os.system("killall -9 rviz")
@@ -209,20 +218,74 @@ def plan_returning_path(battery_over):
         resolution = 0.05
 
         #Dimensions in metres:
-        rover_length = 0.08
-        rover_width = 0.08
+        rover_length = 0.03
+        rover_width = 0.03
         breathing_room = 0.02
 
         #Getting path:
         graph_image, pixel_resolution = binarize(map, resolution, rover_length, rover_width, breathing_room)
         graph = createGraph(graph_image, pixel_resolution)
-        start = (100, 100)
-        end = (55, 89)
+
+
+        print(start, end)
         path = findShortestPath(graph, graph_image.shape[0], start, end)
-        
+
+        path_image = graph_image
+        if len(path) != 0:
+            for point in path:
+                path_image[point[0], point[1]] = 150
+
+        print(path)
+        cv2.imwrite("path_image.jpg", path_image)
+
+def receive_odometry(pose):
+
+    global start
+    global transformation, resolution, pixel_resolution
+
+    x = pose.x
+    y = pose.y
+    #print(x, y)
+    factor = resolution/pixel_resolution
+    map_pos = np.array([[x], [y], [1]])
+    transform = np.multiply(transformation, factor)
+    pos_on_image = np.dot(transform, map_pos)
+    x = int(round(pos_on_image[0][0]))
+    y = int(round(pos_on_image[1][0]))
+    #print("changed start coordinate")
+    start = (x, y)
+    #print(start)
+
+def charging_point(pose):
+
+    global end
+    global transformation, pixel_resolution
+    print(pose)
+    x = pose.x
+    y = pose.y
+    factor = resolution/pixel_resolution
+    map_pos = np.array([[x], [y], [1]])
+    transform = np.multiply(transformation, factor)
+    pos_on_image = np.dot(transform, map_pos)
+    x = int(round(pos_on_image[0][0]))
+    y = int(round(pos_on_image[1][0]))
+    end = (x, y)
+    print(end)
+
 
 
 if __name__ == '__main__':
+
+    #Global Variables:
+    resolution = 0.05
+    pixel_resolution = 0.05
+    start = (0, 0)
+    end = (192, 192)
+    transformation = np.array([[0, -20, 183], [20, 0, 192], [0, 0, 20]])
+    print("initialized")
+
     rospy.init_node('path_planner')
+    end_sub = rospy.Subscriber('/end_coordinate', Pose2D, charging_point)
+    start_sub = rospy.Subscriber('/start_coordinate', Pose2D, receive_odometry)
     check_battery = rospy.Subscriber('out_of_battery', Bool, plan_returning_path)
     rospy.spin()

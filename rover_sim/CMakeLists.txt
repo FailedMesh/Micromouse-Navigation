@@ -221,5 +221,6 @@ catkin_install_python(PROGRAMS scripts/battery.py
                                 scripts/test_scripts/pose_tester.py
                                 scripts/path_planner.py
                                 scripts/Dijkstra.py
+                                scripts/start_end_publisher.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
