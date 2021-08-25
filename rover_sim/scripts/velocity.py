@@ -9,7 +9,7 @@ from sensor_msgs.msg import LaserScan
 from tf.transformations import euler_from_quaternion
 from math import atan2
 
-def callback3(self, msg):
+def callback3(msg):
     move = Twist()
     curr_x = msg.pose.pose.position.x
     curr_y = msg.pose.pose.position.y
