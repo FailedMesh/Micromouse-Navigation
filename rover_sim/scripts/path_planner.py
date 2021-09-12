@@ -7,6 +7,8 @@ import cv2
 from std_msgs.msg import Bool
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose2D
+from rover_sim.msg import float_array
+from rover_sim.msg import path_array
 #from Dijkstra import BinaryHeap, binarize, createGraph, dijkstra, findShortestPath
 
 class BinaryHeap():
@@ -192,11 +194,26 @@ def findShortestPath(graph, image_size, start_coord, end_coord):
     path = []
     if distance[end_coord] == np.inf:
         return []
-    at = end_coord
+    path.append(end_coord)
+    last_at = end_coord
+    at = previous[end_coord]
     while previous[at] != start_coord:
-        path.append(at)
+        x0, y0 = last_at[0], last_at[1]
+        x1, y1 = at[0], at[1]
+        x2, y2 = previous[at][0], previous[at][1]
+        if (x1 - x0):
+            m1 = (y1 - y0)/(x1 - x0)
+        else:
+            m1 = "inf"
+        if (x2 - x1):
+            m2 = (y2 - y1)/(x2 - x1)
+        else:
+            m2 = "inf"
+        if m1 != m2:
+            path.append(at)
         at = previous[at]
-    path.append(start_coord)
+        last_at = at
+    #path.append(start_coord)
     path.reverse()
     
     return path
@@ -229,19 +246,33 @@ def plan_returning_path(battery_over):
 
         print(start, end)
         path = findShortestPath(graph, graph_image.shape[0], start, end)
+        factor = resolution/pixel_resolution
+        inverse_transform = np.linalg.inv(transform)
 
+        path_on_map = path_array()
         path_image = graph_image
         if len(path) != 0:
             for point in path:
                 path_image[point[0], point[1]] = 150
+                image_pos = np.array([[point[0]], [point[1]], [factor*20]])
+                #print(image_pos.shape, inverse_transform.shape)
+                pos_on_map = np.dot(inverse_transform, image_pos)
+                point_on_map = float_array([pos_on_map[0][0], pos_on_map[1][0]])
+                path_on_map.path.append(point_on_map)
 
-        print(path)
+        print("Path found")
+
+        while path_pub.get_num_connections() == 0:
+            continue
+        path_pub.publish(path_on_map)
+        print(path_on_map)
+
         cv2.imwrite("path_image.jpg", path_image)
 
 def receive_odometry(pose):
 
     global start
-    global transformation, resolution, pixel_resolution
+    global transformation, transform, resolution, pixel_resolution
 
     x = pose.x
     y = pose.y
@@ -259,7 +290,7 @@ def receive_odometry(pose):
 def charging_point(pose):
 
     global end
-    global transformation, pixel_resolution
+    global transformation, pixel_resolution, transform
     print(pose)
     x = pose.x
     y = pose.y
@@ -283,6 +314,7 @@ if __name__ == '__main__':
     end = (192, 192)
     transformation = np.array([[0, -20, 183], [20, 0, 192], [0, 0, 20]])
     print("initialized")
+    path_pub = rospy.Publisher('/path', path_array, queue_size = 100)
 
     rospy.init_node('path_planner')
     end_sub = rospy.Subscriber('/end_coordinate', Pose2D, charging_point)

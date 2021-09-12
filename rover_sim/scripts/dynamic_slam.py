@@ -1,10 +1,21 @@
 from os import WUNTRACED
 import rospy
 import tf
+import numpy as np
 from std_msgs.msg import Float64, Bool
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, Point
+
+def greater_than(array, threshold):
+    arr = np.array(array)
+    ans = ((arr > threshold).sum() == arr.size)
+    return ans
+
+def less_than(array, threshold):
+    arr = np.array(array)
+    ans = ((arr <= threshold).sum() == arr.size)
+    return ans
 
 class explorer():
 
@@ -16,11 +27,12 @@ class explorer():
         self.x = 0
         self.y = 0
         self.theta = 0.1
-        self.MaxObstacleDistance = 0.5
+        self.MaxObstacleDistance = 0.8
         self.battery = 0
         self.out_of_battery = Bool()
         self.out_of_battery = False
         self.published_battery = False
+        #self.battery = 60
 
     def update_battery(self, battery_left):
         #print("Battery remaining: ", battery_left.data)
@@ -47,13 +59,18 @@ class explorer():
 
     def avoid_obstacle(self, laserscan):
 
-        if (laserscan.ranges[300] > self.MaxObstacleDistance) and (self.battery > 55.0):
-            self.move.linear.x = 0.2
-            self.move.angular.z = 0.0
+        print(self.battery)
+        print(laserscan.ranges[300])
+        if (self.battery > 55.0):
+            if (greater_than((laserscan.ranges[:20] + laserscan.ranges[-20:]), 0.8)):
+                print("Keep Going")
+                self.move.linear.x = 0.1
+                self.move.angular.z = 0.0
 
-        elif (laserscan.ranges[300] <= self.MaxObstacleDistance) and (self.battery > 55.0): 
-            self.move.linear.x = 0.0
-            self.move.angular.z = 0.5
+            else:
+                print("TURN!!")
+                self.move.linear.x = 0.0
+                self.move.angular.z = 0.2
 
         else:
             print("ENOUGH EXPLORING, NEED TO GET BACK!!")
@@ -67,6 +84,8 @@ class explorer():
         velocity_pub.publish(self.move)
 
         if (not self.published_battery) and self.out_of_battery:
+            while battery_pub.get_num_connections() == 0:
+                continue
             battery_pub.publish(self.out_of_battery)
             self.published_battery = True
 

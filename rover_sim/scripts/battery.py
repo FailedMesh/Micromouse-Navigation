@@ -24,7 +24,7 @@ curr_cap = bt_cap
 prt_rem = 100
 
 while prt_rem > 0:
-    curr_cap = curr_cap - (curr_req*3600/3600)
+    curr_cap = curr_cap - (curr_req*900/3600)
     prt_rem = int(curr_cap*100/bt_cap)
     print("Battery remaining = ", prt_rem)
     rospy.init_node('battery_publisher')
