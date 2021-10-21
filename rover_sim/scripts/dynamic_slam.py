@@ -32,7 +32,7 @@ class explorer():
         self.out_of_battery = Bool()
         self.out_of_battery = False
         self.published_battery = False
-        #self.battery = 60
+        self.battery = 60
 
     def update_battery(self, battery_left):
         #print("Battery remaining: ", battery_left.data)
@@ -64,7 +64,7 @@ class explorer():
         if (self.battery > 55.0):
             if (greater_than((laserscan.ranges[:20] + laserscan.ranges[-20:]), 0.8)):
                 print("Keep Going")
-                self.move.linear.x = 0.1
+                self.move.linear.x = 0.2
                 self.move.angular.z = 0.0
 
             else:

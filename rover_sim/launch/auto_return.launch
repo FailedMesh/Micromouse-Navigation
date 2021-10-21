@@ -1,6 +1,12 @@
 <launch>
 
-<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_world.launch"/>
+<include file="$(find my_simulations)/launch/my_world.launch"/>
 <include file="$(find turtlebot3_slam)/launch/turtlebot3_slam.launch"/>
+
+
+<!--
+<node pkg="rover_sim" type="move_linear.py" name="move_linear"/>
+<node pkg="rover_sim" type="rotate.py" name="rotate"/>
+-->
 
 </launch>

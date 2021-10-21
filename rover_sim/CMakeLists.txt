@@ -58,12 +58,12 @@ message_generation
    path_array.msg
  )
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+# Generate services in the 'srv' folder
+ add_service_files(
+   FILES
+    angle.srv
+    distance.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -225,5 +225,8 @@ catkin_install_python(PROGRAMS scripts/battery.py
                                 scripts/start_end_publisher.py
                                 scripts/traverse_path.py
                                 scripts/velocity.py
+                                scripts/explore_maze.py
+                                scripts/rotate.py
+                                scripts/move_linear.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
