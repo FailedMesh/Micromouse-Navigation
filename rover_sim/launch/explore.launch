@@ -1,7 +1,0 @@
-<launch>
-
-<node pkg="rover_sim" type="start_end_publisher.py" name="start_end_publisher"/>
-<node pkg="rover_sim" type="battery.py" name="battery"/>
-<node pkg="rover_sim" type="dynamic_slam.py" name="dynamic_slam"/>
-
-</launch>
